@@ -25,6 +25,7 @@
             border-radius: 15px; 
             box-shadow: 0 10px 20px rgba(0,0,0,0.05); 
             border-top: 5px solid var(--primary-color);
+            position: relative;
         }
         .dedication {
             font-size: 1.2em;
@@ -52,41 +53,51 @@
             transition: background 0.3s;
             font-weight: bold;
         }
-        button:hover {
-            background-color: #246B43;
-        }
-        .download-btn {
-            background-color: #4a90e2;
-        }
-        .download-btn:hover {
-            background-color: #357abd;
-        }
-        .help-btn {
-            background-color: transparent;
-            color: var(--primary-color);
-            border: 2px solid var(--primary-color);
-            margin-top: 5px;
-            margin-bottom: 15px;
-        }
-        .help-btn:hover {
-            background-color: #eef7ee;
-        }
-        .instructions-box {
-            display: none;
-            background-color: #fff9e6;
-            border: 1px solid #f2d98c;
-            padding: 15px;
-            border-radius: 8px;
-            text-align: right;
-            font-size: 0.9em;
-            line-height: 1.8;
-            margin-bottom: 15px;
-            color: #555;
-        }
+        button:hover { background-color: #246B43; }
+        .download-btn { background-color: #4a90e2; }
+        .download-btn:hover { background-color: #357abd; }
         audio { width: 100%; margin-top: 20px; }
+
+        /* --- أكواد تصميم الجولة الإرشادية --- */
+        .tour-overlay {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.75);
+            z-index: 999;
+        }
+        .tour-box {
+            display: none;
+            position: fixed;
+            background: #fff;
+            padding: 20px;
+            border-radius: 10px;
+            z-index: 1001;
+            width: 85%;
+            max-width: 350px;
+            left: 50%;
+            transform: translateX(-50%);
+            text-align: center;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.5);
+            border: 3px solid var(--primary-color);
+        }
+        .tour-box button { width: auto; padding: 10px 30px; margin-top: 15px; border-radius: 20px;}
+        .highlight-element {
+            position: relative;
+            z-index: 1000 !important;
+            box-shadow: 0 0 20px rgba(255, 255, 255, 0.9) !important;
+            background: white;
+            border-radius: 8px;
+        }
     </style>
 </head>
 <body>
+
+    <div id="tourOverlay" class="tour-overlay"></div>
+    <div id="tourBox" class="tour-box">
+        <p id="tourText" style="font-size: 1.1em; color: #333; line-height: 1.6;"></p>
+        <button onclick="nextTourStep()" id="tourNextBtn">التالي ⬅️</button>
+    </div>
 
     <div class="container">
         <div class="dedication">
@@ -95,17 +106,9 @@
         </div>
 
         <h2>القرآن الكريم 📖</h2>
-
-        <button class="help-btn" onclick="toggleHelp()">ℹ️ كيف يعمل التطبيق؟ (طريقة التشغيل)</button>
-        <div id="helpBox" class="instructions-box">
-            <strong>1️⃣ للاستماع المباشر (بالإنترنت):</strong><br>
-            اختر القارئ والسورة ثم اضغط "استماع مباشر".<br><br>
-            <strong>2️⃣ للاستماع لاحقاً (بدون إنترنت):</strong><br>
-            • والإنترنت يعمل، اختر السورة واضغط "تحميل".<br>
-            • انتظر ظهور رسالة "تم التحميل بنجاح".<br>
-            • الآن يمكنك إغلاق الإنترنت في أي وقت، واختيار نفس السورة، ثم الضغط على "استماع مباشر" وستعمل فوراً!
-        </div>
         
+        <button onclick="startTour()" style="background: transparent; color: var(--primary-color); border: 1px solid var(--primary-color); margin-bottom: 20px; padding: 8px;">ℹ️ كيف أستخدم التطبيق؟</button>
+
         <select id="reciterSelect">
             <option value="https://server11.mp3quran.net/sds/">عبدالرحمن السديس</option>
             <option value="https://server8.mp3quran.net/afs/">مشاري العفاسي</option>
@@ -119,26 +122,73 @@
             <option value="https://server11.mp3quran.net/shatri/">أبوبكر الشاطري</option>
         </select>
 
-        <select id="surahSelect">
-            </select>
+        <select id="surahSelect"></select>
 
-        <button onclick="playAudio()">▶️ استماع مباشر</button>
-        <button class="download-btn" onclick="downloadAudio()">⬇️ تحميل (للاستماع بدون إنترنت)</button>
+        <button id="playBtn" onclick="playAudio()">▶️ استماع مباشر</button>
+        <button id="downloadBtn" class="download-btn" onclick="downloadAudio()">⬇️ تحميل (للاستماع بدون إنترنت)</button>
 
         <audio id="audioPlayer" controls></audio>
     </div>
 
     <script src="app.js"></script>
+
     <script>
-        // دالة إظهار وإخفاء مربع الشرح
-        function toggleHelp() {
-            const helpBox = document.getElementById('helpBox');
-            if (helpBox.style.display === 'block') {
-                helpBox.style.display = 'none';
+        let currentStep = 0;
+        const steps = [
+            { elements: ['reciterSelect', 'surahSelect'], text: "١. أولاً: اختر القارئ واسم السورة من هذه القوائم ⬇️", top: "35%" },
+            { elements: ['playBtn'], text: "٢. ثانياً: اضغط هنا للاستماع المباشر (أثناء اتصالك بالإنترنت) ▶️", top: "50%" },
+            { elements: ['downloadBtn'], text: "٣. أخيراً: اضغط هنا لتحميل السورة، لتعمل معك لاحقاً حتى لو أغلقت الإنترنت! ⬇️", top: "60%" }
+        ];
+
+        function startTour() {
+            document.getElementById('tourOverlay').style.display = 'block';
+            document.getElementById('tourBox').style.display = 'block';
+            currentStep = 0;
+            showStep();
+        }
+
+        function showStep() {
+            // مسح أي تحديد سابق
+            document.querySelectorAll('.highlight-element').forEach(el => el.classList.remove('highlight-element'));
+            
+            if (currentStep < steps.length) {
+                const step = steps[currentStep];
+                // تسليط الضوء على الزر المخصص
+                step.elements.forEach(id => {
+                    document.getElementById(id).classList.add('highlight-element');
+                });
+                document.getElementById('tourText').innerHTML = `<strong>${step.text}</strong>`;
+                document.getElementById('tourBox').style.top = step.top;
+                
+                if (currentStep === steps.length - 1) {
+                    document.getElementById('tourNextBtn').innerText = "✅ فهمت، ابدأ الاستماع";
+                } else {
+                    document.getElementById('tourNextBtn').innerText = "التالي ⬅️";
+                }
             } else {
-                helpBox.style.display = 'block';
+                endTour();
             }
         }
+
+        function nextTourStep() {
+            currentStep++;
+            showStep();
+        }
+
+        function endTour() {
+            document.getElementById('tourOverlay').style.display = 'none';
+            document.getElementById('tourBox').style.display = 'none';
+            document.querySelectorAll('.highlight-element').forEach(el => el.classList.remove('highlight-element'));
+            // حفظ معلومة أن المستخدم شاهد الشرح لكي لا يظهر له مرة أخرى
+            localStorage.setItem('tourCompleted', 'true');
+        }
+
+        // تشغيل الجولة تلقائياً لأي زائر جديد بعد فتح الموقع بثانية
+        window.addEventListener('load', function() {
+            if (!localStorage.getItem('tourCompleted')) {
+                setTimeout(startTour, 1000);
+            }
+        });
     </script>
 </body>
 </html>
