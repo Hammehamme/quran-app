@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>القرآن الكريم - صدقة جارية</title>
+    <link rel="manifest" href="manifest.json">
+    <style>
+        :root {
+            --primary-color: #2E8B57; /* لون أخضر هادئ ومميز */
+            --bg-color: #f9fbf9;
+        }
+        body { 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            text-align: center; 
+            padding: 20px; 
+            background-color: var(--bg-color); 
+            color: #333;
+        }
+        .container { 
+            max-width: 500px; 
+            margin: auto; 
+            background: white; 
+            padding: 30px; 
+            border-radius: 15px; 
+            box-shadow: 0 10px 20px rgba(0,0,0,0.05); 
+            border-top: 5px solid var(--primary-color);
+        }
+        .dedication {
+            font-size: 1.2em;
+            color: #555;
+            background-color: #eef7ee;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 25px;
+            border: 1px dashed var(--primary-color);
+        }
+        select, button { 
+            width: 100%; 
+            margin: 10px 0; 
+            padding: 12px; 
+            border-radius: 8px;
+            border: 1px solid #ccc;
+            font-size: 1em;
+            font-family: inherit;
+        }
+        button {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            cursor: pointer;
+            transition: background 0.3s;
+            font-weight: bold;
+        }
+        button:hover {
+            background-color: #246B43;
+        }
+        .download-btn {
+            background-color: #4a90e2;
+        }
+        .download-btn:hover {
+            background-color: #357abd;
+        }
+        audio { width: 100%; margin-top: 20px; }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <div class="dedication">
+            <strong>صدقة جارية على روح الكابتن / محمد عوض رحمه الله</strong><br>
+            <small>نسألكم الدعاء له بالمغفرة والرحمة</small>
+        </div>
+
+        <h2>القرآن الكريم 📖</h2>
+        
+        <select id="reciterSelect">
+            <option value="https://server11.mp3quran.net/sds/">عبدالرحمن السديس</option>
+            <option value="https://server8.mp3quran.net/afs/">مشاري العفاسي</option>
+            <option value="https://server7.mp3quran.net/basit/">عبدالباسط عبدالصمد</option>
+            <option value="https://server12.mp3quran.net/maher/">ماهر المعيقلي</option>
+            <option value="https://server11.mp3quran.net/yasser/">ياسر الدوسري</option>
+            <option value="https://server7.mp3quran.net/shur/">سعود الشريم</option>
+            <option value="https://server7.mp3quran.net/s_gmd/">سعد الغامدي</option>
+            <option value="https://server13.mp3quran.net/husr/">محمود خليل الحصري</option>
+            <option value="https://server10.mp3quran.net/minsh/">محمد صديق المنشاوي</option>
+            <option value="https://server11.mp3quran.net/shatri/">أبوبكر الشاطري</option>
+        </select>
+
+        <select id="surahSelect">
+            </select>
+
+        <button onclick="playAudio()">▶️ استماع مباشر</button>
+        <button class="download-btn" onclick="downloadAudio()">⬇️ تحميل (للاستماع بدون إنترنت)</button>
+
+        <audio id="audioPlayer" controls></audio>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
